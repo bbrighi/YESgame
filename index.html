@@ -1,0 +1,371 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="initial-scale=1.0, user-scalable=no">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black">
+  <title>YES game</title>
+  <link rel="apple-touch-icon-precomposed" href="css/image/yes_game.png" />
+  <link rel="apple-touch-startup-image" href="css/image/yes_game.png">
+  <link rel="shortcut icon" href="css/image/favicon.ico">
+  <link rel="stylesheet" href="css/jquery.mobile-1.3.2.min.css">
+  <!-- jQuery and jQuery Mobile -->
+  <script src="scripts/jquery-1.10.1.min.js"></script>
+  <script src="scripts/index.js"></script>
+  <script src="scripts/jquery.mobile-1.3.2.min.js"></script>
+  <script src="scripts/jquery.cookie.js"></script>
+	<script>
+    $(document).ready(function() {
+       function leggi(obj) {
+          output = parseInt($(obj).val());
+          if (isNaN(output)) output = 0;
+          $(obj).val(output);
+          return output;
+       }
+       function setStorage() {
+          if (localStorage) return true;
+          else return false;
+       }
+       function compute() {
+              var entrate_attive = leggi('#attive1');
+              var entrate_automatiche = leggi('#automatiche1') + leggi('#automatiche2') + leggi('#automatiche3') + leggi('#automatiche4');
+              var uscite_totale = leggi('#uscite1') + leggi('#uscite2') + leggi('#uscite3') + leggi('#uscite4') + leggi('#uscite5') + leggi('#uscite6');
+              $('#attive').html(entrate_attive);
+              $('#automatiche').html(entrate_automatiche);
+              $('#uscite').html(uscite_totale);
+              $('#cashflow').html(entrate_attive + entrate_automatiche - uscite_totale);
+              $('#ilf').html(entrate_automatiche - uscite_totale);
+              var liquidi_totale = leggi('#liquidi1') + leggi('#liquidi2') + leggi('#liquidi3') + leggi('#liquidi4');
+              var illiquidi_totale = leggi('#illiquidi1') + leggi('#illiquidi2');
+              var capricci_totale = leggi('#capricci1') + leggi('#capricci2') + leggi('#capricci3');
+              var attivita_totale = liquidi_totale + illiquidi_totale + capricci_totale;
+              $('#liquidi').html(liquidi_totale);
+              $('#illiquidi').html(illiquidi_totale);
+              $('#capricci').html(capricci_totale);
+              $('#attivita').html(attivita_totale);
+              var breve_totale = leggi('#brevetermine1');
+              var lungo_totale = leggi('#lungotermine1');
+              var debiti_totale = leggi('#debiti1') + leggi('#debiti2') + leggi('#debiti3');
+              var passivita_totale = breve_totale + lungo_totale + debiti_totale;
+              $('#brevetermine').html(breve_totale);
+              $('#lungotermine').html(lungo_totale);
+              $('#debiti').html(debiti_totale);
+              $('#passivita').html(passivita_totale);
+              $('#patrimonio').html(attivita_totale - passivita_totale);
+            }
+       function import_cashflow() {
+       
+              if (setStorage)  var contenuto = localStorage["save_cashflow"];
+              else var contenuto = $.cookie("save_cashflow");
+              
+              var obj = $.parseJSON(contenuto);
+              $('#attive1').val(obj['attive'][0]);
+              $('#automatiche1').val(obj['automatiche'][0]); $('#automatiche2').val(obj['automatiche'][1]);
+              $('#automatiche3').val(obj['automatiche'][2]); $('#automatiche4').val(obj['automatiche'][3]);
+              $('#uscite1').val(obj['uscite'][0]); $('#uscite2').val(obj['uscite'][1]); $('#uscite3').val(obj['uscite'][2]);//6
+              $('#uscite4').val(obj['uscite'][3]); $('#uscite5').val(obj['uscite'][4]); $('#uscite6').val(obj['uscite'][5]);//6
+              $('#liquidi1').val(obj['liquidi'][0]); $('#liquidi2').val(obj['liquidi'][1]);
+              $('#liquidi2').val(obj['liquidi'][2]); $('#liquidi3').val(obj['liquidi'][3]);
+              $('#illiquidi1').val(obj['illiquidi'][0]); $('#illiquidi2').val(obj['illiquidi'][1]); //2
+              $('#capricci1').val(obj['capricci'][0]); $('#capricci2').val(obj['capricci'][1]); $('#capricci3').val(obj['capricci'][2]);//3
+              $('#brevetermine1').val(obj['breve'][0]);
+              $('#lungotermine1').val(obj['lungo'][0]);
+              $('#debiti1').val(obj['debiti'][0]); $('#debiti2').val(obj['debiti'][1]); $('#debiti3').val(obj['debiti'][2]);
+              compute();
+            }
+       function save_cashflow() {
+             var contenuto  = '{' +
+             '"attive": ['+ leggi("#attive1") +'],' +
+             '"automatiche": ['+ leggi("#automatiche1") +','+ leggi("#automatiche2") +','+ leggi("#automatiche3") +','+ leggi("#automatiche4") +'],' +
+             '"uscite": ['+ leggi("#uscite1") +','+ leggi("#uscite2") +','+ leggi("#uscite3") +','+ leggi("#uscite4") +','+ leggi("#uscite5") +','+ leggi("#uscite6") +'],' +
+             '"liquidi": ['+ leggi("#liquidi1") +','+ leggi("#liquidi2") +','+ leggi("#liquidi3") +','+ leggi("#liquidi4") +'],' +
+             '"illiquidi": ['+ leggi("#illiquidi1") +','+ leggi("#illiquidi2") +'],' +
+             '"capricci": ['+ leggi("#capricci1") +','+ leggi("#capricci2") +','+ leggi("#capricci3") +'],' +
+             '"breve": ['+ leggi("#brevetermine1") +'],' +
+             '"lungo": ['+ leggi("#lungotermine1") +'],' +
+             '"debiti": ['+ leggi("#debiti1") +','+ leggi("#debiti2") +','+ leggi("#debiti3") +']}';
+             //alert(contenuto);
+             if (setStorage) localStorage["save_cashflow"] = contenuto;
+             else {
+                $.cookie.json = true;
+                $.cookie("save_cashflow", contenuto);
+             }
+            }
+       function delete_cashflow() {
+             if (confirm('Sei sicuro di voler cancellare i dati?')){
+             var contenuto  = '{' +
+             '"attive": [0],' +
+             '"automatiche": [0,0,0,0],' +
+             '"uscite": [0,0,0,0,0,0],' +
+             '"liquidi": [0,0,0,0],' +
+             '"illiquidi": [0,0],' +
+             '"capricci": [0,0],' +
+             '"breve": [0],' +
+             '"lungo": [0],' +
+             '"debiti": [0,0,0]}';
+             if (setStorage) localStorage["save_cashflow"] = contenuto;
+             else {
+                $.cookie.json = true;
+                $.cookie("save_cashflow", contenuto);
+             }
+             import_cashflow()
+            }}
+            $('.input').change(compute);
+            $('#salva').click(save_cashflow);
+            $('#cancella').click(delete_cashflow);
+            import_cashflow();
+     });
+</script>
+  <style>
+  		.page .ui-panel-display-reveal {
+  			-webkit-box-shadow: none;
+  			-moz-box-shadow: none;
+  			box-shadow: none;
+  		}
+  		.page .ui-panel-content-wrap-position-left {
+  			-webkit-box-shadow: -5px 0px 5px rgba(0,0,0,.15);
+  			-moz-box-shadow: -5px 0px 5px rgba(0,0,0,.15);
+  			box-shadow: -5px 0px 5px rgba(0,0,0,.15);
+  		}
+  </style>
+</head>
+<body>
+
+<!-- Home -->
+<div data-url="page0" data-role="page" id="page0" class='page' data-theme="e">
+    <div data-role="header">
+        <h3>YES game</h3>
+        <a href="#left-panel" data-icon="bars" data-iconpos="notext" data-shadow="false" data-iconshadow="false">Menu</a>
+    </div><!-- /header -->
+    <div data-role="panel" id="left-panel" data-theme="e">
+        <ul data-role="listview" data-theme="e" data-iconpos="right" >
+            <li data-icon="delete" data-theme="a"><a href="#" data-rel="close">Close</a></li>
+            <li data-theme="d"><a href="javascript:void(0)" id="salva">Salva dati</a></li>
+            <li data-theme="d"><a href="javascript:void(0)" id="cancella">Cancella dati</a></li>
+        </ul>
+    </div><!-- /panel -->
+    <div data-role="content">
+<!-- Conto Economico -->
+        <div data-role="collapsible-set">
+            <div data-role="collapsible">
+                <h3>
+                    <div style="float:right"><span id="attive"></span> €</div>
+                    Entrate attive
+                </h3>
+                    <label for="attive1">
+                        Reddito da professione
+                    </label>
+                    <input name="attive1" id="attive1" placeholder="€" value="" data-mini="true" type="number" class='input'>
+
+            </div>
+        </div>
+        <div data-role="collapsible-set">
+            <div data-role="collapsible">
+                <h3>
+                    <div style="float:right"><span id="automatiche"></span> €</div>
+                  Entrate automatiche
+                </h3>
+
+                    <label for="automatiche1">
+                        Interessi attivi
+                    </label>
+                    <input name="automatiche1" id="automatiche1" placeholder="€" value="" data-mini="true" type="number" class='input'>
+                   <label for="automatiche2">
+                        Utili società
+                    </label>
+                    <input name="automatiche2" id="automatiche2" placeholder="€" value="" data-mini="true" type="number" class='input'>
+                    <label for="automatiche3">
+                        Affitti
+                    </label>
+                    <input name="automatiche3" id="automatiche3" placeholder="€" value="" data-mini="true" type="number" class='input'>
+                    <label for="automatiche4">
+                        Royalties / Altri utili
+                    </label>
+                    <input name="automatiche4" id="automatiche4" placeholder="€" value="" data-mini="true" type="number" class='input'>
+
+            </div>
+        </div>
+        <div data-role="collapsible-set">
+            <div data-role="collapsible">
+                <h3>
+                    <div style="float:right"><span id="uscite"></span> €</div>
+                   Uscite correnti
+                </h3>
+                    <label for="uscite1">
+                        Rata mutuo / affitti
+                    </label>
+                    <input name="uscite1" id="uscite1" placeholder="€" value="" data-mini="true" type="number" class='input'>
+                    <label for="uscite2">
+                        Tasse
+                    </label>
+                    <input name="uscite2" id="uscite2" placeholder="€" value="" data-mini="true" type="number" class='input'>
+                    <label for="uscite3">
+                        Altre spese correnti
+                    </label>
+                    <input name="uscite3" id="uscite3" placeholder="€" value="" data-mini="true" type="number" class='input'>
+                    <label for="uscite4">
+                        Mantenimento figli
+                    </label>
+                    <input name="uscite4" id="uscite4" placeholder="€" value="" data-mini="true" type="number" class='input'>
+                    <label for="uscite5">
+                        Prestiti bancari
+                    </label>
+                    <input name="uscite5" id="uscite5" placeholder="€" value="" data-mini="true" type="number" class='input'>
+                    <label for="uscite6">
+                        Rate auto
+                    </label>
+                    <input name="uscite6" id="uscite6" placeholder="€" value="" data-mini="true" type="number" class='input'>
+            </div>
+        </div>
+
+            <div class="ui-bar ui-bar-b">
+                <div style="float:right"><span id="cashflow"></span> €</div>
+                <h2>CashFlow</h2>
+            </div>
+            <div class="ui-bar ui-bar-b">
+                <div style="float:right"><span id="ilf"></span> €</div>
+                <h2>Indice libertà finanziaria</h2>
+            </div>
+
+
+<!-- Attività stato patrimoniale -->
+           <div data-role="collapsible-set">
+              <div data-role="collapsible">
+                <h3>
+                    <div style="float:right"><span id="attivita"></span> €</div>
+                    Totale attività
+                </h3>
+
+                <div data-role="collapsible-set" data-theme="c">
+                    <div data-role="collapsible">
+                        <h3>
+                            <div style="float:right"><span id="liquidi"></span> €</div>
+                            Totale liquidi
+                        </h3>
+                            <label for="liquidi1">
+                                Disponibilità liquide / Banca
+                            </label>
+                            <input name="liquidi1" id="liquidi1" placeholder="€" value="0" data-mini="true" type="number" class='input'>
+                            <label for="liquidi2">
+                                Azioni / Opzioni
+                            </label>
+                            <input name="liquidi2" id="liquidi2" placeholder="€" value="0" data-mini="true" type="number" class='input'>
+                            <label for="liquidi3">
+                                Obbligazioni
+                            </label>
+                            <input name="liquidi3" id="liquidi3" placeholder="€" value="0" data-mini="true" type="number" class='input'>
+                            <label for="liquidi4">
+                                Quote fondi di investimento
+                            </label>
+                            <input name="liquidi4" id="liquidi4" placeholder="€" value="0" data-mini="true" type="number" class='input'>
+                    </div>
+                </div>
+                <div data-role="collapsible-set" data-theme="c">
+                    <div data-role="collapsible">
+                        <h3>
+                            <div style="float:right"><span id="illiquidi"></span> €</div>
+                            Totale illiquidi
+                        </h3>
+                            <label for="illiquidi1">
+                                Immobili per investimento
+                            </label>
+                            <input name="illiquidi1" id="illiquidi1" placeholder="€" value="0" data-mini="true" type="number" class='input'>
+                            <label for="illiquidi2">
+                                Aziende
+                            </label>
+                            <input name="illiquidi2" id="illiquidi2" placeholder="€" value="0" data-mini="true" type="number" class='input'>
+                    </div>
+                </div>
+                <div data-role="collapsible-set" data-theme="c">
+                    <div data-role="collapsible">
+                        <h3>
+                            <div style="float:right"><span id="capricci"></span> €</div>
+                            Totale capricci
+                        </h3>
+                            <label for="capricci1">
+                                Abitazione principale
+                            </label>
+                            <input name="capricci1" id="capricci1" placeholder="€" value="0" data-mini="true" type="number" class='input'>
+                            <label for="capricci2">
+                                Abitazione secondaria / vacanze
+                            </label>
+                            <input name="capricci2" id="capricci2" placeholder="€" value="0" data-mini="true" type="number" class='input'>
+                            <label for="capricci3">
+                                Auto / Moto
+                            </label>
+                            <input name="capricci3" id="capricci3" placeholder="€" value="0" data-mini="true" type="number" class='input'>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+<!-- Passività stato patrimoniale -->
+        <div data-role="collapsible-set">
+            <div data-role="collapsible">
+                <h3>
+                  <div style="float:right"><span id="passivita"></span> €</div>
+                  Totale passivita
+                </h3>
+
+                <div data-role="collapsible-set" data-theme="c">
+                    <div data-role="collapsible">
+                        <h3>
+                            <div style="float:right"><span id="brevetermine"></span> €</div>
+                            Breve termine
+                        </h3>
+                            <label for="brevetermine1">
+                                Prestiti bancari
+                            </label>
+                            <input name="brevetermine1" id="brevetermine1" placeholder="€" value="0" data-mini="true" type="number" class='input'>
+                    </div>
+                </div>
+                <div data-role="collapsible-set" data-theme="c">
+                    <div data-role="collapsible">
+                        <h3>
+                            <div style="float:right"><span id="lungotermine"></span> €</div>
+                            Lungo termine
+                        </h3>
+                            <label for="lungotermine1">
+                                Mutui per investimento
+                            </label>
+                            <input name="lungotermine1" id="lungotermine1" placeholder="€" value="0" data-mini="true" type="number" class='input'>
+                    </div>
+                </div>
+                <div data-role="collapsible-set" data-theme="c">
+                    <div data-role="collapsible">
+                        <h3>
+                            <div style="float:right"><span id="debiti"></span> €</div>
+                            Debiti per capricci
+                        </h3>
+                            <label for="debiti1">
+                                Mutuo per abitazione principale
+                            </label>
+                            <input name="debiti1" id="debiti1" placeholder="€" value="0" data-mini="true" type="number" class='input'>
+                            <label for="debiti2">
+                                Mutuo per abitazioni secondarie
+                            </label>
+                            <input name="debiti2" id="debiti2" placeholder="€" value="0" data-mini="true" type="number" class='input'>
+                            <label for="debiti3">
+                                Debiti auto/moto/vacanze
+                            </label>
+                            <input name="debiti3" id="debiti3" placeholder="€" value="0" data-mini="true" type="number" class='input'>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+            <div class="ui-bar ui-bar-b">
+                <div style="float:right"><span id="patrimonio"></span> €</div>
+                <h2>Patrimonio</h2>
+            </div>
+
+    </div><!-- /content -->
+
+</div>
+
+
+</div><!-- /page -->
+
+</body>
+</html>
